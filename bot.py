@@ -46,6 +46,11 @@ WITHDRAW_MIN_IRIDIUM = int(os.getenv("WITHDRAW_MIN_IRIDIUM", "35"))
 WITHDRAW_COMMISSION_PERCENT = float(os.getenv("WITHDRAW_COMMISSION_PERCENT", "7"))
 CONTROL_CHANNEL_ID = os.getenv("CONTROL_CHANNEL_ID", "").strip()
 SEND_CONTROL_PANEL_ON_READY = os.getenv("SEND_CONTROL_PANEL_ON_READY", "true").lower() == "true"
+ADMIN_ROLE_IDS = {
+    int(role_id)
+    for role_id in os.getenv("ADMIN_ROLE_IDS", "").replace(";", ",").split(",")
+    if role_id.strip().isdigit()
+}
 CONTROL_PANEL_TITLE = "Панель экономики"
 ADMIN_PANEL_TITLE = "Панель администрации"
 
@@ -352,7 +357,9 @@ def format_timedelta(delta: timedelta) -> str:
 
 
 def is_admin(member: discord.Member) -> bool:
-    return member.guild_permissions.administrator
+    if member.guild_permissions.administrator:
+        return True
+    return any(role.id in ADMIN_ROLE_IDS for role in member.roles)
 
 
 def get_control_channel_id() -> Optional[int]:
